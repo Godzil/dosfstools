@@ -72,21 +72,21 @@ void ui_print_progress(int pos, int max)
         static uint8_t last_car = 0;
 
         if (output_ui_fd == 0) {
-            float percent = (pos / max) * 100;
+            double percent = ((double)pos / (double)max) * 100.0;
             char bar[60];
-            int nbbar = (pos * MAX_BAR) / 100;
-            int i;
+            uint32_t nbbar = (pos * MAX_BAR) / max;
+            uint32_t i;
             memset(bar, 0, 60);
             for(i = 0 ; i < MAX_BAR ; i++) {
                 if (i < nbbar)
                     bar[i] = '=';
                 else bar[i] = ' ';
             }
-            sprintf(buffer, "|%s %c %2.1f%%", bar, rotator[last_car], percent);
+            sprintf(buffer, "|%s %c %2.1f%%\r", bar, rotator[last_car], percent);
             last_car = (last_car + 1) % 4;
         }
         else {
-            sprintf(buffer, "%d %d %d %s", current_pass, pos, max, cur_device);
+            sprintf(buffer, "%d %d %d %s\n", current_pass, pos, max, cur_device);
         }
         ui_print_text(buffer);
     }
