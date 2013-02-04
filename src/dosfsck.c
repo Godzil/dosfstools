@@ -3,6 +3,7 @@
    Copyright (C) 1993 Werner Almesberger <werner.almesberger@lrc.di.epfl.ch>
    Copyright (C) 1998 Roman Hodek <Roman.Hodek@informatik.uni-erlangen.de>
    Copyright (C) 2008-2013 Daniel Baumann <mail@daniel-baumann.ch>
+   Copyright (C) 2013 Manoel Trapier <godzil@godzil.net>
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,8 +41,10 @@
 #include "fat.h"
 #include "file.h"
 #include "check.h"
+#include "ui.h"
 
 int interactive = 0, rw = 0, list = 0, test = 0, verbose = 0, write_immed = 0;
+extern int output_ui_fd, output_ui;
 int atari_format = 0, boot_only = 0;
 unsigned n_files = 0;
 void *mem_queue = NULL;
@@ -56,6 +59,7 @@ static void usage(char *name)
     fprintf(stderr, "  -d path  drop that file\n");
     fprintf(stderr, "  -f       salvage unused chains to files\n");
     fprintf(stderr, "  -l       list path names\n");
+    fprintf(stderr, "  -C [fd]  Display completion to fd file descriptor\n");
     fprintf(stderr,
 	    "  -n       no-op, check non-interactively without changing\n");
     fprintf(stderr, "  -p       same as -a, for compat with other *fsck\n");
@@ -109,9 +113,9 @@ int main(int argc, char **argv)
     interactive = 1;
     check_atari();
 
-    while ((c = getopt(argc, argv, "Aad:bflnprtu:vVwy")) != EOF)
+    while ((c = getopt(argc, argv, "Aad:bC:flnprtu:vVwy")) != EOF)
 	switch (c) {
-	case 'A':		/* toggle Atari format */
+	case 'A':               /* toggle Atari format */
 	    atari_format = !atari_format;
 	    break;
 	case 'a':
@@ -159,6 +163,10 @@ int main(int argc, char **argv)
 	case 'w':
 	    write_immed = 1;
 	    break;
+	case 'C':
+	    output_ui_fd = atoi(optarg);
+	    output_ui = 1;
+	    break;
 	default:
 	    usage(argv[0]);
 	}
@@ -169,30 +177,48 @@ int main(int argc, char **argv)
     if (optind != argc - 1)
 	usage(argv[0]);
 
-    printf("dosfsck " VERSION ", " VERSION_DATE ", FAT32, LFN\n");
-    fs_open(argv[optind], rw);
 
+    printf("dosfsck " VERSION ", " VERSION_DATE ", FAT32, LFN\n");
+    /* Now open FileSystem, and do all the checks.. */
+    fs_open(argv[optind], rw);
+    ui_set_device(argv[optind]);
+
+    ui_print_new_pass("Checking boot sector...");
     read_boot(&fs);
     if (boot_only)
-        goto exit;
+	goto exit;
 
     if (verify)
 	printf("Starting check/repair pass.\n");
+
+    ui_print_new_pass("Scanning FAT...");
     while (read_fat(&fs), scan_root(&fs))
 	qfree(&mem_queue);
-    if (test)
+
+    if (test) {
+	ui_print_new_pass("Fix bad FAT...");
 	fix_bad(&fs);
-    if (salvage_files)
+    }
+
+    if (salvage_files) {
+	ui_print_new_pass("Reclaim bad file...");
 	reclaim_file(&fs);
-    else
+    }
+    else {
+	ui_print_new_pass("Reclaim free space...");
 	reclaim_free(&fs);
+    }
+
+    ui_print_new_pass("Verify free clusters...");
     free_clusters = update_free(&fs);
     file_unused();
     qfree(&mem_queue);
     n_files_check = n_files;
+
     if (verify) {
 	n_files = 0;
 	printf("Starting verification pass.\n");
+	ui_print_new_pass("Starting verification pass...");
 	read_fat(&fs);
 	scan_root(&fs);
 	reclaim_free(&fs);
@@ -205,8 +231,10 @@ exit:
 	if (rw) {
 	    if (interactive)
 		rw = get_key("yn", "Perform changes ? (y/n)") == 'y';
-	    else
+	    else {
+		ui_print_new_pass("Performing changes...");
 		printf("Performing changes.\n");
+	    }
 	} else
 	    printf("Leaving file system unchanged.\n");
     }

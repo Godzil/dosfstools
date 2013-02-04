@@ -38,9 +38,9 @@ all: build
 
 build: dosfsck dosfslabel mkdosfs
 
-dosfsck: boot.o check.o common.o fat.o file.o io.o lfn.o dosfsck.o
+dosfsck: boot.o check.o common.o fat.o file.o io.o lfn.o dosfsck.o ui.o
 
-dosfslabel: boot.o check.o common.o fat.o file.o io.o lfn.o dosfslabel.o
+dosfslabel: boot.o check.o common.o fat.o file.o io.o lfn.o dosfslabel.o ui.o
 
 mkdosfs: mkdosfs.o
 
