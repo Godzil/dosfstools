@@ -1,3 +1,39 @@
+commit 2cb87542fae10448f0ee358095c838cee3587082
+Author: Godzil <godzil@godzil.net>
+Date:   Mon Feb 4 17:36:04 2013 +0100
+
+    Update man page
+
+commit 2688353714f302d86ca1b8a146bc81ef33319438
+Author: Godzil <godzil@godzil.net>
+Date:   Mon Feb 4 17:21:44 2013 +0100
+
+    Bump version
+
+commit 18aba79467bdf990b1a72cf94c562a28a9f66be0
+Author: Godzil <godzil@godzil.net>
+Date:   Mon Feb 4 17:20:30 2013 +0100
+
+    Correct small mistakes in ui functions.
+
+commit 559fd817ef7d4d5a4c773a9dae1c6ae13f3448e7
+Author: Godzil <godzil@godzil.net>
+Date:   Mon Feb 4 17:09:58 2013 +0100
+
+    Add UI definition, and preliminary support on major check loops.
+
+commit 1734c45303ab00c821ac114aba187173a0a032f9
+Author: Godzil <godzil@godzil.net>
+Date:   Mon Feb 4 15:48:36 2013 +0100
+
+    Add readme
+
+commit 7a04539a5ab0f6b403cc58a407be2848b4b47b8a
+Author: Daniel Baumann <mail@daniel-baumann.ch>
+Date:   Wed Jan 23 13:22:01 2013 +0100
+
+    Releasing version 3.0.14.
+
 commit 0d8f0020cae997f22c222f83ae8c2f65ab939fdc
 Author: Daniel Baumann <mail@daniel-baumann.ch>
 Date:   Wed Jan 23 13:16:20 2013 +0100
